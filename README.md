@@ -5,8 +5,8 @@
 
 Использовалось: 
 
-GalaSoft.MvvmLight для организации MVVM
+GalaSoft.MvvmLight для организации MVVM - http://www.mvvmlight.net/
 
-MahApps.Metro для организации интерфейса
+MahApps.Metro для организации интерфейса - https://mahapps.com/
 
-ClosedXML для организации работы с xlsx файлами
+ClosedXML для организации работы с xlsx файлами - https://github.com/ClosedXML/ClosedXML
