@@ -1,0 +1,369 @@
+﻿<Controls:MetroWindow
+    x:Class="SpecificationToSummary.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+    xmlns:local="clr-namespace:SpecificationToSummary"
+    Title="{StaticResource TitleMainWindow}"
+    Width="1200"
+    Height="650">
+    <Controls:MetroWindow.DataContext>
+        <local:ViewModelMainWindow />
+    </Controls:MetroWindow.DataContext>
+    <Controls:MetroWindow.Resources>
+        <local:ConverterDataFindToColorRow x:Key="ConverterDataFindToColorRow" />
+    </Controls:MetroWindow.Resources>
+    <TabControl>
+
+        <TabItem Header="{StaticResource TabItemHeaderSettingsSearch}">
+
+            <GroupBox Grid.Row="0" Header="{StaticResource GroupBoxHeaderFileData}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Button
+                            Margin="5"
+                            Command="{Binding CommandAddFiles}"
+                            Content="{StaticResource ButtonAddFile}" />
+                        <Button
+                            Grid.Column="1"
+                            Margin="5"
+                            Command="{Binding CommandClearCollection}"
+                            Content="{StaticResource ButtonClearCollection}" />
+                    </Grid>
+
+                    <DataGrid
+                        Grid.Row="1"
+                        ItemsSource="{Binding CollectionFiles}"
+                        Style="{StaticResource DataGridDefault}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                Width="*"
+                                Binding="{Binding Name}"
+                                Header="{StaticResource DataGridColumnHeaderNameFile}" />
+                            <DataGridTextColumn
+                                Width="*"
+                                Binding="{Binding Path}"
+                                Header="{StaticResource DataGridColumnHeaderPathFile}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                </Grid>
+            </GroupBox>
+
+        </TabItem>
+
+        <TabItem Header="{StaticResource TabItemHeaderResult}">
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button
+                        Grid.Column="0"
+                        Margin="10"
+                        Command="{Binding CommandReadFile}"
+                        Content="{StaticResource ButtonReadFile}"
+                        FontSize="18" />
+
+                    <Button
+                        Grid.Column="1"
+                        Margin="10"
+                        Command="{Binding CommandClearCollectionResult}"
+                        Content="{StaticResource ButtonClearCollection}" />
+
+                    <Grid Grid.Column="2">
+                        <Grid.Style>
+                            <Style TargetType="{x:Type Grid}">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ProgressReport.ProcessedFile}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <ProgressBar
+                            Grid.Row="0"
+                            Margin="5"
+                            Maximum="{Binding ProgressReport.ProgressMax, FallbackValue=0}"
+                            Value="{Binding ProgressReport.ProgressValue, FallbackValue=0}" />
+
+                        <StackPanel
+                            Grid.Row="1"
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal">
+                            <Controls:ProgressRing Width="50">
+                                <Controls:ProgressRing.Style>
+                                    <Style TargetType="{x:Type Controls:ProgressRing}">
+                                        <Setter Property="IsActive" Value="False" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ProgressReport.ProcessType}" Value="{x:Static local:ProcessType.Working}">
+                                                <Setter Property="IsActive" Value="True" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Controls:ProgressRing.Style>
+                            </Controls:ProgressRing>
+                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                                <TextBlock
+                                    Margin="5,0"
+                                    VerticalAlignment="Center"
+                                    Text="{StaticResource TextBlockProcesedFile}" />
+                                <TextBlock Text="( " />
+                                <TextBlock Text="{Binding ProgressReport.ProgressValue}" />
+                                <TextBlock Text=" / " />
+                                <TextBlock Text="{Binding CollectionFiles.Count}" />
+                                <TextBlock Text=" )" />
+                                <TextBlock
+                                    Margin="5,0"
+                                    FontWeight="Bold"
+                                    Text="{Binding ProgressReport.ProcessedFile}" />
+                            </StackPanel>
+
+                        </StackPanel>
+
+                    </Grid>
+
+                </Grid>
+
+                <GroupBox Grid.Row="1" Header="{StaticResource GroupBoxHeaderFileData}">
+                    <Grid>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <DataGrid
+                            Name="DG"
+                            Grid.Row="0"
+                            ItemsSource="{Binding CollectionView}"
+                            Style="{StaticResource DataGridDefault}">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="SelectionChanged">
+                                    <i:InvokeCommandAction Command="{Binding CommandSelectionChanged}" CommandParameter="{Binding Path=SelectedItems, ElementName=DG}" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                            <DataGrid.RowStyle>
+                                <Style BasedOn="{StaticResource MetroDataGridRow}" TargetType="{x:Type DataGridRow}">
+                                    <Setter Property="Background" Value="{Binding ., Converter={StaticResource ConverterDataFindToColorRow}}" />
+                                </Style>
+                            </DataGrid.RowStyle>
+
+                            <DataGrid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Command="{Binding CommandMerger}" Header="{StaticResource DataGridContextMenuMerger}" />
+                                    <Separator />
+                                    <MenuItem Command="{Binding CommandUncheck}" Header="{StaticResource DataGridContextMenuUnCheck}" />
+                                    <Separator />
+                                    <MenuItem
+                                        Command="{Binding CommandRemoveItem}"
+                                        FontWeight="Bold"
+                                        Foreground="Red"
+                                        Header="{StaticResource DataGridContextMenuRemoveItem}" />
+                                </ContextMenu>
+                            </DataGrid.ContextMenu>
+
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style BasedOn="{StaticResource MetroDataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                    <Setter Property="ContentTemplate">
+                                        <Setter.Value>
+                                            <DataTemplate>
+                                                <TextBlock
+                                                    HorizontalAlignment="Center"
+                                                    Text="{Binding}"
+                                                    TextWrapping="Wrap" />
+                                            </DataTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
+                            <DataGrid.GroupStyle>
+                                <GroupStyle>
+                                    <GroupStyle.Panel>
+                                        <ItemsPanelTemplate>
+                                            <DataGridRowsPresenter />
+                                        </ItemsPanelTemplate>
+                                    </GroupStyle.Panel>
+                                    <GroupStyle.ContainerStyle>
+                                        <Style TargetType="{x:Type GroupItem}">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                        <Expander>
+                                                            <Expander.Header>
+                                                                <Grid>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="*" />
+                                                                        <ColumnDefinition Width="*" />
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <TextBlock
+                                                                        Grid.Column="0"
+                                                                        Style="{StaticResource TextBlockResultLabel}"
+                                                                        Text="{Binding Path=Name}" />
+                                                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                                                        <TextBlock Style="{StaticResource TextBlockResultLabel}" Text="{StaticResource DataGridGroupCountPosition}" />
+                                                                        <TextBlock Style="{StaticResource TextBlockRedFont}" Text="{Binding Path=ItemCount}" />
+                                                                    </StackPanel>
+                                                                </Grid>
+                                                            </Expander.Header>
+                                                            <ItemsPresenter />
+                                                        </Expander>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </GroupStyle.ContainerStyle>
+                                </GroupStyle>
+                            </DataGrid.GroupStyle>
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn>
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox IsChecked="{Binding IsCheck, UpdateSourceTrigger=PropertyChanged}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTextColumn
+                                    Width="30"
+                                    Binding="{Binding Position}"
+                                    ElementStyle="{StaticResource WrapTextColumn}"
+                                    Header="{StaticResource DataGridColumnHeaderPosition}" />
+
+                                <DataGridTemplateColumn
+                                    Width="5*"
+                                    Header="{StaticResource DataGridColumnHeaderNamePosition}"
+                                    SortMemberPath="NamePosition">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding NamePosition}" TextWrapping="Wrap">
+                                                <TextBlock.ToolTip>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock VerticalAlignment="Center" Text="{StaticResource DataGridColumnHeaderNameFile}" />
+                                                        <TextBlock Text=": " />
+                                                        <TextBlock Text="{Binding NameFile}" />
+                                                    </StackPanel>
+                                                </TextBlock.ToolTip>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <TextBox Text="{Binding NamePosition, UpdateSourceTrigger=PropertyChanged}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn
+                                    Width="2*"
+                                    Binding="{Binding TypePosition}"
+                                    ElementStyle="{StaticResource WrapTextColumn}"
+                                    Header="{StaticResource DataGridColumnHeaderType}" />
+                                <DataGridTextColumn
+                                    Width="*"
+                                    Binding="{Binding Code}"
+                                    ElementStyle="{StaticResource WrapTextColumn}"
+                                    Header="{StaticResource DataGridColumnHeaderCode}" />
+                                <DataGridTextColumn
+                                    Width="2*"
+                                    Binding="{Binding Factory}"
+                                    ElementStyle="{StaticResource WrapTextColumn}"
+                                    Header="{StaticResource DataGridColumnHeaderFactory}" />
+                                <DataGridTextColumn
+                                    Width="70"
+                                    Binding="{Binding Unit}"
+                                    ElementStyle="{StaticResource HorizontalAlignmentCenterTextColumn}"
+                                    Header="{StaticResource DataGridColumnHeaderUnit}" />
+                                <DataGridTextColumn
+                                    Width="70"
+                                    Binding="{Binding Count}"
+                                    ElementStyle="{StaticResource HorizontalAlignmentCenterTextColumn}"
+                                    Header="{StaticResource DataGridColumnHeaderCount}" />
+                                <DataGridTextColumn
+                                    Width="70"
+                                    Binding="{Binding Mass}"
+                                    ElementStyle="{StaticResource HorizontalAlignmentCenterTextColumn}"
+                                    Header="{StaticResource DataGridColumnHeaderMass}" />
+                            </DataGrid.Columns>
+
+                        </DataGrid>
+
+                        <WrapPanel
+                            Grid.Row="1"
+                            HorizontalAlignment="Left"
+                            Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <Rectangle
+                                    Width="10"
+                                    Height="10"
+                                    Fill="Yellow" />
+                                <TextBlock Text="{StaticResource TextBlockLegendaYelow}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Rectangle
+                                    Width="10"
+                                    Height="10"
+                                    Fill="Red" />
+                                <TextBlock Text="{StaticResource TextBlockLegendaRed}" />
+                            </StackPanel>
+                        </WrapPanel>
+
+                        <WrapPanel
+                            Grid.Row="1"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource TextBlockResultLabel}" Text="{StaticResource TextBlockCountFound}" />
+                            <TextBlock
+                                Margin="5,0,50,0"
+                                Style="{StaticResource TextBlockRedFont}"
+                                Text="{Binding CollectionResults.Count, FallbackValue=0}" />
+
+                        </WrapPanel>
+
+                        <Button
+                            Grid.Row="1"
+                            Margin="3"
+                            HorizontalAlignment="Right"
+                            Command="{Binding CommandEditFile}"
+                            Content="{StaticResource ButtonWriteFileMaster}" />
+
+                    </Grid>
+                </GroupBox>
+
+            </Grid>
+
+        </TabItem>
+
+    </TabControl>
+    <Controls:MetroWindow.Flyouts>
+        <Controls:FlyoutsControl>
+            <Controls:Flyout IsOpen="{Binding ProgressReport.IsOpenMessage}" Style="{StaticResource FlyoutsDefault}" />
+        </Controls:FlyoutsControl>
+    </Controls:MetroWindow.Flyouts>
+</Controls:MetroWindow>
